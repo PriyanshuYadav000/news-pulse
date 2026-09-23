@@ -80,7 +80,11 @@ async function getTimeline() {
       MIN(a.published_at) AS start_time,
       MAX(a.published_at) AS end_time,
       COUNT(ac.article_id)::int AS article_count,
-      COUNT(ac.article_id)::int AS intensity
+      COUNT(ac.article_id)::int AS intensity,
+      ARRAY_AGG(
+        DISTINCT a.source
+        ORDER BY a.source
+      ) FILTER (WHERE a.source IS NOT NULL) AS sources
     FROM clusters c
     JOIN article_clusters ac
       ON c.id = ac.cluster_id
@@ -92,7 +96,10 @@ async function getTimeline() {
 
   const result = await pool.query(query);
 
-  return result.rows;
+  return result.rows.map((row) => ({
+    ...row,
+    sources: row.sources || [],
+  }));
 }
 
 module.exports = {
