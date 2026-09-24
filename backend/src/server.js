@@ -11,11 +11,10 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT || 5001;
-
+const HOST = process.env.HOST || "0.0.0.0";
 
 app.use(cors());
 app.use(express.json());
-
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -24,11 +23,9 @@ app.get("/health", (req, res) => {
   });
 });
 
-
 app.use("/clusters", clusterRoutes);
 app.use("/timeline", timelineRoutes);
 app.use("/ingest", ingestRoutes);
-
 
 app.use((req, res) => {
   res.status(404).json({
@@ -36,7 +33,6 @@ app.use((req, res) => {
     path: req.originalUrl,
   });
 });
-
 
 app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);
@@ -46,16 +42,15 @@ app.use((error, req, res, next) => {
   });
 });
 
-
-const server = app.listen(PORT, () => {
-  console.log(`News Pulse backend running on port ${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(
+    `News Pulse backend running on http://${HOST}:${PORT}`
+  );
 });
-
 
 server.on("error", (error) => {
   console.error("Server error:", error);
 });
-
 
 process.on("uncaughtException", (error) => {
   console.error("Uncaught exception:", error);
